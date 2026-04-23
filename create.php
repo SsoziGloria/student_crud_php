@@ -15,16 +15,18 @@ if ($_POST) {
     $student->age = (int) $_POST['age'];
 
     if (empty($student->name) || empty($student->email) || empty($student->course) || empty($student->age)) {
-        $error = "All fields are required.";
-    } elseif (!filter_var($student->email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Invalid email format.";
+    $error = "All fields are required.";
+} elseif (!filter_var($student->email, FILTER_VALIDATE_EMAIL)) {
+    $error = "Invalid email format.";
+} elseif ($student->emailExists()) {
+    $error = "This email is already registered.";
+} else {
+    if ($student->create()) {
+        header("Location: read.php");
     } else {
-        if ($student->create()) {
-            header("Location: read.php");
-        } else {
-            $error = "Failed to add student.";
-        }
+        $error = "Failed to add student.";
     }
+}
 }
 ?>
 

@@ -16,10 +16,19 @@ if ($_POST) {
     $student->course = htmlspecialchars(trim($_POST['course']));
     $student->age = (int) $_POST['age'];
 
-    if (empty($student->name) || empty($student->email) || empty($student->course) || empty($student->age)) {
-        $error = "All fields are required.";
-    } elseif (!filter_var($student->email, FILTER_VALIDATE_EMAIL)) {
-        $error = "Invalid email format.";
+   if (empty($student->name) || empty($student->email) || empty($student->course) || empty($student->age)) {
+    $error = "All fields are required.";
+} elseif (!filter_var($student->email, FILTER_VALIDATE_EMAIL)) {
+    $error = "Invalid email format.";
+} else {
+    $check = $db->prepare("SELECT id FROM students WHERE email = :email AND id != :id");
+    $check->execute([
+        ':email' => $student->email,
+        ':id' => $student->id
+    ]);
+
+    if ($check->rowCount() > 0) {
+        $error = "This email is already used by another student.";
     } else {
         if ($student->update()) {
             header("Location: read.php");
@@ -27,6 +36,7 @@ if ($_POST) {
             $error = "Update failed.";
         }
     }
+}
 }
 ?>
 
